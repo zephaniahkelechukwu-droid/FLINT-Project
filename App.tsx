@@ -1,6 +1,4 @@
-
 import React, { useState } from 'react';
-import { User, Post, TabView, Hashtag } from './types';
 import Navigation from './components/Navigation';
 import Sidebar from './components/Sidebar';
 import Feed from './components/Feed';
@@ -12,111 +10,82 @@ import Auth from './components/Auth';
 import IntroAnimation from './components/IntroAnimation';
 import Explore from './components/Explore';
 import Settings from './components/Settings';
+import { User, Post } from './types'; // Ensure you have User and Post types defined
 
-const INITIAL_USER: User = {
-  id: 'user_001',
-  name: 'CLARA SOLOMON',
-  handle: '@clara_os',
-  avatar: 'https://picsum.photos/seed/clara_os/150/150',
-  bio: 'System Architect. Reality is just a construct. 🌌',
-  location: 'Node 7',
-  isVerified: true,
-  verifiedColor: 'liquid-glass',
-  followers: '30B',
-  following: '42',
-  joinedDate: 'September 2025',
-  flintCoin: 1540,
-  isTrending: true,
-  status: 'Coding the future'
+// --- MOCK USER TO BYPASS AUTHENTICATION ---
+const MOCK_USER: User = {
+    id: 'u1',
+    name: 'Nicholas Linus',
+    handle: '@zephaniahkelechukwu-droid',
+    avatar: 'https://picsum.photos/seed/user/150/150',
+    bio: 'FLINT Project Developer. Node Access Forced.',
+    followers: '10k',
+    following: '500',
+    joinedDate: 'Dec 2025'
 };
-
-const MOCK_POSTS: Post[] = [
-  { id: '1', userId: 'bot1', user: { ...INITIAL_USER, name: 'MARS.CO', handle: '@mars_co', avatar: 'https://images.unsplash.com/photo-1614728853913-1e2ae8a60481?w=150&h=150&fit=crop', isVerified: true, verifiedColor: 'red', followers: '10B', following: '0', bio: '', joinedDate: '' }, content: 'Terraforming complete in Sector 4. The air smells like rust and victory. 🔴✨', likes: 4500, comments: 200, shares: 50, views: 12000, tips: 500, timestamp: '1h', isPinned: true },
-  // REPLACED Tobi's audio post with a text post
-  { id: '2', userId: 'bot2', user: { ...INITIAL_USER, name: 'TOBI', handle: '@tobi_turtle', avatar: 'https://images.unsplash.com/photo-1437622368342-7a3d73a34c8f?w=150&h=150&fit=crop', isVerified: true, verifiedColor: 'green', followers: '10B', following: '0', bio: '', joinedDate: '' }, content: 'Just beat the hare in a race. Slow and steady, folks. 🐢💨 #Speed', likes: 1200, comments: 45, shares: 12, views: 5000, tips: 20, timestamp: '3h' },
-];
-
-const MOCK_TRENDING: Hashtag[] = [
-  { tag: '#FlintOS', posts: '2.5M', category: 'Technology' },
-  { tag: '#MarsColony', posts: '1.2M', category: 'Space' },
-  { tag: 'Zephaniah', posts: '500K', category: 'Creator' },
-  { tag: '#AnimeLife', posts: '450K', category: 'Entertainment' },
-];
-
-const MOCK_SUGGESTIONS: User[] = [
-  { id: 'z', name: 'ZEPHANIAH', handle: '@creator', avatar: 'https://picsum.photos/seed/zeph/150/150', isVerified: true, followers: '30B', following: '1', bio: 'The Creator.', joinedDate: 'Day 0' },
-  { id: 'r', name: 'ROTIMI', handle: '@rotimi_baller', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop', isVerified: true, verifiedColor: 'liquid-glass', followers: '20B', following: '10', bio: '', joinedDate: '' },
-];
+// ------------------------------------
 
 const App: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showIntro, setShowIntro] = useState(true);
-  const [currentUser, setCurrentUser] = useState<User>(INITIAL_USER);
-  const [currentTab, setCurrentTab] = useState<TabView>('feed');
-  const [posts, setPosts] = useState<Post[]>(MOCK_POSTS);
+    // FORCING STATE: Setting currentUser to a mock object and isLoading to false 
+    // This bypasses the IntroAnimation and Auth checks.
+    const [currentUser, setCurrentUser] = useState<User | null>(MOCK_USER); 
+    const [currentTab, setCurrentTab] = useState('feed');
+    const [isLoading, setIsLoading] = useState(false); 
 
-  const handleLogin = (userData: Partial<User>) => {
-    setCurrentUser(prev => ({ ...prev, ...userData }));
-    setIsAuthenticated(true);
-  };
+    // Placeholder data and functions
+    const mockPosts: Post[] = [];
+    const bookmarkedPosts: Post[] = [];
+    const handleLogout = () => setCurrentUser(null);
+    const handleLogin = (user: User) => setCurrentUser(user);
+    const onPostCreated = () => console.log("Post created placeholder");
 
-  const handleCreatePost = (newPost: Post) => {
-    setPosts([newPost, ...posts]);
-    setCurrentUser(prev => ({
-      ...prev,
-      posts: [newPost, ...(prev.posts || [])]
-    }));
-  };
 
-  if (showIntro) {
-    return <IntroAnimation onClose={() => setShowIntro(false)} />;
-  }
+    // --- CRITICAL BYPASS LOGIC ---
+    // If you ever want to re-enable the loading animation, comment out the line 
+    // below and re-enable the conditionals (if, return <IntroAnimation...>)
+    if (isLoading) {
+        return <IntroAnimation />; // This line will not be hit because isLoading is false
+    }
+    if (!currentUser) {
+        return <Auth onLogin={handleLogin} />; // This line will not be hit because currentUser is MOCK_USER
+    }
+    // -----------------------------
 
-  if (!isAuthenticated) {
-    return <Auth onLogin={handleLogin} />;
-  }
 
-  // Filter posts for Bookmarks tab (mock)
-  const bookmarkedPosts = posts.filter((_, index) => index === 0);
+    return (
+        <div className="flex h-screen bg-neon-dark text-white font-sans overflow-hidden">
+            {/* Navigation / Sidebar (Always visible) */}
+            <Navigation 
+                currentUser={currentUser} 
+                currentTab={currentTab} 
+                onTabChange={setCurrentTab} 
+                onLogout={handleLogout}
+            />
 
-  return (
-    <div className="min-h-screen bg-black text-white flex justify-center">
-      <div className="w-full max-w-[1300px] flex">
-        
-        {/* Navigation / Sidebar */}
-        <header className="flex-shrink-0">
-           <Navigation 
-             currentTab={currentTab} 
-             onTabChange={setCurrentTab} 
-             currentUser={currentUser}
-             onLogout={() => setIsAuthenticated(false)}
-           />
-        </header>
+            {/* Main Content Area */}
+            <main className="flex-1 overflow-y-auto pt-16 md:pt-0"> 
+                {currentTab === 'feed' && <Feed currentUser={currentUser} posts={mockPosts} onPostCreated={onPostCreated} />}
+                {currentTab === 'profile' && <Profile currentUser={currentUser} />}
+                {currentTab === 'liter' && <div className="h-screen"><LiteR /></div>}
+                {currentTab === 'messages' && <Friends />}
+                {currentTab === 'notifications' && <Notifications />}
+                {currentTab === 'explore' && <Explore />}
+                {currentTab === 'bookmarks' && <Feed currentUser={currentUser} posts={bookmarkedPosts} onPostCreated={onPostCreated} />}
+                {currentTab === 'settings' && <Settings user={currentUser} />}
 
-        {/* Main Content Area */}
-        <main className="flex-1 min-w-0 border-r border-white/10">
-           {currentTab === 'feed' && <Feed currentUser={currentUser} posts={posts} onPostCreated={handleCreatePost} />}
-           {currentTab === 'profile' && <Profile user={currentUser} />}
-           {currentTab === 'liter' && <div className="h-screen"><LiteR /></div>}
-           {currentTab === 'messages' && <Friends currentUser={currentUser} />}
-           {currentTab === 'notifications' && <Notifications />}
-           {currentTab === 'explore' && <Explore />}
-           {currentTab === 'bookmarks' && <Feed currentUser={currentUser} posts={bookmarkedPosts} onPostCreated={() => {}} />}
-           {currentTab === 'settings' && <Settings user={currentUser} />}
-        </main>
+                {/* Fallback/Home Tab */}
+                {currentTab === 'home' && (
+                    <div className="p-8 text-center">
+                        <h1 className="text-4xl font-display text-neon-pink">FLINT Project is Operational.</h1>
+                        <p className="mt-4 text-xl text-gray-400">Use the Navigation bar to view tabs.</p>
+                    </div>
+                )}
+            </main>
 
-        {/* Right Sidebar (Desktop Only) */}
-        <aside className="hidden lg:block flex-shrink-0">
-           <Sidebar 
-             trending={MOCK_TRENDING} 
-             suggestions={MOCK_SUGGESTIONS} 
-             onSearch={(q) => console.log(q)} 
-           />
-        </aside>
-
-      </div>
-    </div>
-  );
+            {/* Right Sidebar (Desktop Only) */}
+            <Sidebar />
+        </div>
+    );
 };
 
 export default App;
