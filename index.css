@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Ensure a basic dark background is set to confirm rendering */
+body {
+    background-color: #121212; 
+    color: #f0f0f0;
+    font-family: sans-serif;
+}
