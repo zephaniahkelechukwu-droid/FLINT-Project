@@ -1,10 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// This configuration is clean and relies on postcss.config.js for Tailwind processing,
-// avoiding the "require" command that crashes the Vercel build.
-
-// https://vitejs.dev/config/
+// Clean version relying on postcss.config.js
 export default defineConfig({
   plugins: [react()],
 });
